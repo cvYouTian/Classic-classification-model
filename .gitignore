@@ -1,0 +1,6 @@
+data_set
+checkpoint
+*.jpg
+*.png
+.idea
+*.pth
