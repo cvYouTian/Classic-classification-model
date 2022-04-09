@@ -32,7 +32,7 @@ def main():
     for key in del_key:
         del pre_weights[key]
     # load_state_dict()是将咱们的模型net用load加载好的数据填充， 因为上面得参数处理使得咱们的模型多了全连接层， 故strict要设为False
-    missing_keys, unexpected_keys = net.load_state_dict(pre_weights, strict=False)
+    missing_keys, unexpected_keys =  net.load_state_dict(pre_weights, strict=False)
     # 将列表用换行符分割打印
     print("[missing_keys]:", *missing_keys, sep="\n")
     print("[unexpected_keys]:", *unexpected_keys, sep="\n")

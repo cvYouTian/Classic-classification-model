@@ -169,6 +169,9 @@ if __name__ == '__main__':
         del weights[i]
 
 
+    net.load_state_dict(weights, strict=False)
+
+
 
 
 

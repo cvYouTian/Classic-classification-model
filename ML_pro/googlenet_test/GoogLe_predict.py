@@ -34,11 +34,23 @@ def main():
     class_indict = json.load(json_file)
 
     # create model
-    model = GoogleNet(num_classes=5, aux_logits=False, init_weights=False).to(device)
+    # model = GoogleNet(num_classes=5, aux_logits=False, init_weights=False).to(device)
+    weight ="./googlenetNet.pth"
+    model = GoogleNet(num_classes=5, aux_logits=True, init_weights=False).to(device)
+    # print(net)
+    del_weight = []
+    weights = torch.load(weight, map_location="cuda:0")
+    for key, value in weights.items():
+        if "aux1" == key.strip().split('.')[0] or "aux2" == key.strip().split('.')[0]:
+            del_weight.append(key)
+    for i in del_weight:
+        del weights[i]
+
+    model.load_state_dict(weights, strict=False)
     # load model weights
-    weights_path = "./googlenetNet.pth"
-    assert os.path.exists(weights_path), "file: '{}' dose not exist.".format(weights_path)
-    model.load_state_dict(torch.load(weights_path, map_location=device))
+    # weights_path = "./googlenetNet.pth"
+    # assert os.path.exists(weights_path), "file: '{}' dose not exist.".format(weights_path)
+    # model.load_state_dict(torch.load(weights_path, map_location=device))
 
     model.eval()
     with torch.no_grad():
