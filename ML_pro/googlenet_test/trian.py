@@ -74,7 +74,7 @@ def main():
 
     model_name = "googlenet"
 
-    net = GoogleNet(num_classes=5, aux_logits=False, init_weights=False)
+    net = GoogleNet(num_classes=5, aux_logits=True, init_weights=False)
     net.to(device)
     loss_function = nn.CrossEntropyLoss()
 
@@ -95,8 +95,12 @@ def main():
         for step, data in enumerate(train_bar):
             images, labels = data
             optimizer.zero_grad()
-            outputs = net(images.to(device))
-            loss = loss_function(outputs, labels.to(device))
+            outputs, aux1, aux2 = net(images.to(device))
+            loss1 = loss_function(outputs, labels.to(device))
+            loss2 = loss_function(aux1, labels.to(device))
+            loss3 = loss_function(aux2, labels.to(device))
+            loss = loss1 + loss2 * 0.3 + loss3 * 0.3
+
             loss.backward()
             optimizer.step()
 

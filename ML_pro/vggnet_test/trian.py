@@ -33,8 +33,6 @@ def main():
     train_num = len(train_dataset)
 
 
-
-
     # {'daisy':0, 'dandelion':1, 'roses':2, 'sunflower':3, 'tulips':4}
     flower_list = train_dataset.class_to_idx
 
@@ -43,10 +41,6 @@ def main():
     json_str = json.dumps(cla_dict, indent=4)
     with open('class_indices.json', 'w') as json_file:
         json_file.write(json_str)
-
-
-
-
 
 
     batch_size = 16
@@ -66,10 +60,6 @@ def main():
                                                   num_workers=nw)
     print("using {} images for training, {} images for validation.".format(train_num,
                                                                            val_num))
-
-    # test_data_iter = iter(validate_loader)
-    # test_image, test_label = test_data_iter.next()
-
 
 
     model_name = "vgg16"
