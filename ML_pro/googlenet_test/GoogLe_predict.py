@@ -39,7 +39,7 @@ def main():
     model = GoogleNet(num_classes=5, aux_logits=True, init_weights=False).to(device)
     # print(net)
     del_weight = []
-    weights = torch.load(weight, map_location="cuda:0")
+    weights = torch.load(weight, map_location=device)
     for key, value in weights.items():
         if "aux1" == key.strip().split('.')[0] or "aux2" == key.strip().split('.')[0]:
             del_weight.append(key)
@@ -58,7 +58,6 @@ def main():
         output = torch.squeeze(model(img.to(device))).cpu()
         predict = torch.softmax(output, dim=0)
         predict_cla = torch.argmax(predict).numpy()
-
 
     print_res = "class: {}   prob: {:.3}".format(class_indict[str(predict_cla)],
                                                  predict[predict_cla].numpy())
