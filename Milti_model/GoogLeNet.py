@@ -1,93 +1,94 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
 
 
-class GoogleNet(nn.Module):
-    def __init__(self, num_classes=5, aux_logits=True, init_weights=False):
-        super(GoogleNet, self).__init__()
-        self.aux_logits = aux_logits
-
+class GoogLenet(nn.Module):
+    def __init__(self, num_classes=5, aux=True):
+        super(GoogLenet, self).__init__()
+        self.aux = aux
         self.feature = nn.Sequential(
             # [112, 112, 64]
             nn.Conv2d(in_channels=3, out_channels=64, kernel_size=(7, 7), stride=(2, 2), padding=3),
             nn.ReLU(True),
             # [56, 56, 64]
-            nn.MaxPool2d(kernel_size=3, stride=(2, 2), ceil_mode=True),
+            nn.MaxPool2d(kernel_size=(3, 3), stride=2, ceil_mode=True),
             # [56, 56, 64]
-            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 3), stride=(1, 1), padding=1),
+            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(1, 1), stride=(1, 1)),
             nn.ReLU(True),
             # [56, 56, 192]
-            nn.Conv2d(in_channels=64, out_channels=192, kernel_size=(3, 3), stride=(1, 1), padding=1),
+            nn.Conv2d(in_channels=64, out_channels=192, kernel_size=(3,3), stride=(1, 1), padding=1),
             nn.ReLU(True),
             # [28, 28, 192]
-            nn.MaxPool2d(kernel_size=3, stride=(2, 2), ceil_mode=True)
+            nn.MaxPool2d(kernel_size=(3, 3), stride=2, ceil_mode=True),
         )
-            # [28, 28, 256]
-        self.incep3a = Inception(192, 64, 96, 128, 16, 32, 32)
+        # [28, 28, 256]
+        self.inception3a = Inception(in_ch=192, ch11=64, ch33pre=96, ch33=128, ch55pre=16, ch55=32, chmaxla=32)
         # [28, 28, 480]
-        self.incep3b = Inception(256, 128, 128, 192, 32, 96, 64)
+        self.inception3b = Inception(in_ch=256, ch11=128, ch33pre=128, ch33=192, ch55pre=32, ch55=96, chmaxla=64)
         # [14, 14, 480]
-        self.maxpooling1 = nn.MaxPool2d(kernel_size=(3, 3), stride=2, ceil_mode=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=(3, 3), stride=2, ceil_mode=True)
         # [14, 14, 512]
-        self.incep4a = Inception(480, 192, 96, 208, 16, 48, 64)
-        if aux_logits:
-            self.aux1 = InceptionAux(in_ch=512, num_classes=num_classes)
-            self.aux2 = InceptionAux(in_ch=528, num_classes=num_classes)
+        self.inception4a = Inception(in_ch=480, ch11=192, ch33pre=96, ch33=208, ch55pre=16, ch55=48, chmaxla=64)
         # [14, 14, 512]
-        self.incep4b = Inception(512, 160, 112, 224, 24, 64, 64)
-        self.incep4c = Inception(512, 128, 128, 256, 24, 64, 64)
+        self.inception4b = Inception(in_ch=512, ch11=160, ch33pre=112, ch33=224, ch55pre=24, ch55=64, chmaxla=64)
+        # [14, 14, 512]
+        self.inception4c = Inception(in_ch=512, ch11=128, ch33pre=128, ch33=256, ch55pre=24, ch55=64, chmaxla=64)
         # [14, 14, 528]
-        self.incep4d = Inception(512, 112, 144, 288, 32, 64, 64)
+        self.inception4d = Inception(in_ch=512, ch11=112, ch33pre=144, ch33=288, ch55pre=32, ch55=64, chmaxla=64)
         # [14, 14, 832]
-        self.incep4e = Inception(528, 256, 160, 320, 32, 128, 128)
+        self.inception4e = Inception(in_ch=528, ch11=256, ch33pre=160, ch33=320, ch55pre=32, ch55=128, chmaxla=128)
         # [7, 7, 832]
-        self.maxpooling2 = nn.MaxPool2d(kernel_size=(3, 3), stride=(2, 2), ceil_mode=True)
-        self.incep5a = Inception(832, 256, 160, 320, 32, 128, 128)
+        self.maxpool2 = nn.MaxPool2d(kernel_size=(3, 3), stride=2, ceil_mode=True)
+        # [7, 7, 832]
+        self.inception5a = Inception(in_ch=832, ch11=256, ch33pre=160, ch33=320, ch55pre=32, ch55=128, chmaxla=128)
         # [7, 7, 1024]
-        self.incep5b = Inception(832, 384, 192, 384, 48, 128, 128)
+        self.inception5b = Inception(in_ch=832, ch11=384, ch33pre=192, ch33=384, ch55pre=48, ch55=128, chmaxla=128)
 
-        self.classifer = nn.Sequential(
-            # 就是一个简单的全局平均池化来替代flatten
-            nn.AvgPool2d(kernel_size=(7, 7), stride=1),
-            nn.Flatten(),
-            nn.Dropout(0.4),
-            nn.Linear(in_features=1024, out_features=num_classes)
-        )
+        # self.avgpool = nn.AvgPool2d(kernel_size=(7, 7), stride=(1, 1))
+        # self.fc = nn.Linear(in_features=1024, out_features=num_classes)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.dropout = nn.Dropout(0.4)
+        self.fc = nn.Linear(1024, num_classes)
+
+        self.aux1 = Aux(in_ch=512, num_classes=num_classes)
+        self.aux2 = Aux(in_ch=528, num_classes=num_classes)
+
 
     def forward(self, x):
         x = self.feature(x)
-        # [28, 28, 256]
-        x = self.incep3a(x)
-        # [28, 28, 480]
-        x = self.incep3b(x)
-        # [14, 14, 480]
-        x = self.maxpooling1(x)
-        # [14, 14, 512]
-        x = self.incep4a(x)
-        if self.training and self.aux_logits:
+        x = self.inception3a(x)
+        x = self.inception3b(x)
+        x = self.maxpool(x)
+        x = self.inception4a(x)
+
+        if self.aux and self.training:
             aux1 = self.aux1(x)
-        # [14, 14, 512]
-        x = self.incep4b(x)
-        x = self.incep4c(x)
-        # [14, 14, 528]
-        x = self.incep4d(x)
-        if self.training and self.aux_logits:
+        x = self.inception4b(x)
+        x = self.inception4c(x)
+        x = self.inception4d(x)
+        if self.aux and self.training:
             aux2 = self.aux2(x)
-        # [14, 14, 832]
-        x = self.incep4e(x)
-        # [7, 7, 832]
-        x = self.maxpooling2(x)
-        x = self.incep5a(x)
-        # [7, 7, 1024]
-        x = self.incep5b(x)
+        x = self.inception4e(x)
 
-        logits= self.classifer(x)
+        x = self.inception5a(x)
+        x = self.inception5b(x)
 
-        if self.training and self.aux_logits:
-            return logits, aux1, aux2
+        x = self.avgpool(x)
+        # N x 1024 x 1 x 1
+        x = torch.flatten(x, 1)
+        # N x 1024
+        x = self.dropout(x)
+        x = self.fc(x)
 
-        return logits
+        # x = self.aver(x)
+        # x = torch.flatten(x, 1)
+        # x = self.dropout(x)
+        # output = self.fc(x)
+
+        if self.aux and self.training:
+            return x, aux1, aux2
+
+        return x
 
 
 class Inception(nn.Module):
@@ -95,27 +96,24 @@ class Inception(nn.Module):
         super(Inception, self).__init__()
         self.branch1 = nn.Sequential(
             nn.Conv2d(in_channels=in_ch, out_channels=ch11, kernel_size=(1, 1), stride=(1, 1)),
-            nn.ReLU(True)
+            nn.ReLU(True),
         )
-
         self.branch2 = nn.Sequential(
             nn.Conv2d(in_channels=in_ch, out_channels=ch33pre, kernel_size=(1, 1), stride=(1, 1)),
             nn.ReLU(True),
             nn.Conv2d(in_channels=ch33pre, out_channels=ch33, kernel_size=(3, 3), stride=(1, 1), padding=1),
-            nn.ReLU(True)
+            nn.ReLU(True),
         )
-
         self.branch3 = nn.Sequential(
             nn.Conv2d(in_channels=in_ch, out_channels=ch55pre, kernel_size=(1, 1), stride=(1, 1)),
             nn.ReLU(True),
             nn.Conv2d(in_channels=ch55pre, out_channels=ch55, kernel_size=(5, 5), stride=(1, 1), padding=2),
-            nn.ReLU(True)
+            nn.ReLU(True),
         )
-
         self.branch4 = nn.Sequential(
-            nn.MaxPool2d(kernel_size=3, stride=(1, 1), padding=1),
+            nn.MaxPool2d(kernel_size=(3, 3), stride=(1, 1), padding=1),
             nn.Conv2d(in_channels=in_ch, out_channels=chmaxla, kernel_size=(1, 1), stride=(1, 1)),
-            nn.ReLU(True)
+            nn.ReLU(True),
         )
 
     def forward(self, x):
@@ -124,59 +122,35 @@ class Inception(nn.Module):
         x3 = self.branch3(x)
         x4 = self.branch4(x)
 
-        outputs = torch.cat([x1, x2, x3, x4], dim=1)
-        return outputs
+        output = torch.cat([x1, x2, x3, x4], dim=1)
+        return output
 
 
-class InceptionAux(nn.Module):
-    # aux1 = 14, 14, 512  aux2 = 14, 14, 528
+class Aux(nn.Module):
     def __init__(self, in_ch, num_classes=5):
-        super(InceptionAux, self).__init__()
-        # [4, 4, nn]
-        self.averagePool = nn.AvgPool2d(kernel_size=(5, 5), stride=(3, 3))
-        #
-        self.con1 = nn.Conv2d(in_channels=in_ch, out_channels=128, kernel_size=(1, 1), stride=(1, 1))
-
-        # flatten
-        self.fc = nn.Linear(in_features=4*4*128, out_features=1024)
-        self.fc2 = nn.Linear(in_features=1024, out_features=num_classes)
+        super(Aux, self).__init__()
+        # [14, 14, 512] -> [4, 4, 512]
+        self.averagePool = nn.AvgPool2d(kernel_size=(5, 5), stride=3)
+        # [4, 4, 128]
+        self.conv1 = nn.Conv2d(in_channels=in_ch, out_channels=128, kernel_size=(1, 1), stride=(1, 1))
         self.relu = nn.ReLU(True)
+        self.fc = nn.Sequential(
+            nn.Linear(in_features=4 * 4 * 128, out_features=1024),
+            nn.ReLU(True),
+            nn.Dropout(0.7),
+            nn.Linear(in_features=1024, out_features=num_classes)
+        )
 
     def forward(self, x):
         x = self.averagePool(x)
-        # 最后一层卷积千万不要做relu
-        x = self.con1(x)
+        x = self.conv1(x)
         x = self.relu(x)
         x = torch.flatten(x, 1)
-        x = self.fc(x)
-        x = self.relu(x)
-        x = F.dropout(x, 0.7, training=self.training)
-        logits = self.fc2(x)
+        output = self.fc(x)
 
-        return logits
+        return output
 
 
 if __name__ == '__main__':
-    weight = r"../ML_pro/googlenet_test/googlenetNet.pth"
-    net = GoogleNet(num_classes=5, aux_logits=True, init_weights=False)
-    # print(net)
-    del_weight =[]
-    weights = torch.load(weight, map_location="cuda:0")
-    for key, value in weights.items():
-        if "aux1" == key.strip().split('.')[0] or "aux2" == key.strip().split('.')[0]:
-            del_weight.append(key)
-    for i in del_weight:
-        del weights[i]
-
-
-    net.load_state_dict(weights, strict=False)
-
-
-
-
-
-
-
-
-
-
+    net = GoogLenet(num_classes=5, aux=False)
+    print(net)

@@ -6,7 +6,7 @@ import torch
 from PIL import Image
 from torchvision import transforms
 import matplotlib.pyplot as plt
-from Milti_model.GoogLeNet import GoogLenet
+from Milti_model.Resnet34 import ResNet34
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
     # load image
-    img_path = "./tulip.jpg"
+    img_path = "../../tulip.jpg"
     assert os.path.exists(img_path), "file: '{}' dose not exist.".format(img_path)
     img = Image.open(img_path)
     plt.imshow(img)
@@ -34,9 +34,9 @@ def main():
     class_indict = json.load(json_file)
 
     # create model
-    model = GoogLenet(num_classes=5, aux=False).to(device)
+    model = ResNet34(num_class=5).to(device)
     # load model weights
-    weights_path = "./googlenetNet11.pth"
+    weights_path = "./ResNet.pth"
     assert os.path.exists(weights_path), "file: '{}' dose not exist.".format(weights_path)
     model.load_state_dict(torch.load(weights_path, map_location=device))
 

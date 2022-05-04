@@ -9,7 +9,7 @@ from torchvision import transforms, datasets
 import torch.optim as optim
 from tqdm import tqdm
 
-from Milti_model.GoogLeNet import GoogleNet
+from Milti_model.GoogLeNet import GoogLenet
 
 
 def main():
@@ -33,8 +33,6 @@ def main():
     train_num = len(train_dataset)
 
 
-
-
     # {'daisy':0, 'dandelion':1, 'roses':2, 'sunflower':3, 'tulips':4}
     flower_list = train_dataset.class_to_idx
 
@@ -43,10 +41,6 @@ def main():
     json_str = json.dumps(cla_dict, indent=4)
     with open('class_indices.json', 'w') as json_file:
         json_file.write(json_str)
-
-
-
-
 
 
     batch_size = 16
@@ -67,14 +61,10 @@ def main():
     print("using {} images for training, {} images for validation.".format(train_num,
                                                                            val_num))
 
-    # test_data_iter = iter(validate_loader)
-    # test_image, test_label = test_data_iter.next()
-
-
 
     model_name = "googlenet"
 
-    net = GoogleNet(num_classes=5, aux_logits=True, init_weights=False)
+    net = GoogLenet(num_classes=5, aux=True)
     net.to(device)
     loss_function = nn.CrossEntropyLoss()
 
@@ -99,8 +89,8 @@ def main():
             loss1 = loss_function(outputs, labels.to(device))
             loss2 = loss_function(aux1, labels.to(device))
             loss3 = loss_function(aux2, labels.to(device))
-            loss = loss1 + loss2 * 0.3 + loss3 * 0.3
 
+            loss = loss1+loss2*0.3+loss3*0.3
             loss.backward()
             optimizer.step()
 
