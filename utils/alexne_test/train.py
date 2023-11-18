@@ -13,8 +13,5 @@ import numpy as np
 from tqdm import tqdm
 
 
-from Milti_model import Alexnet
+from model import Alexnet
 
-
-def main():
-    device =

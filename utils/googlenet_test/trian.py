@@ -9,7 +9,7 @@ from torchvision import transforms, datasets
 import torch.optim as optim
 from tqdm import tqdm
 
-from Milti_model.GoogLeNet import GoogLenet
+from model.GoogLeNet import GoogLenet
 
 
 def main():

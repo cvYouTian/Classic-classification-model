@@ -7,7 +7,7 @@ from tensorflow.keras.callbacks import (
 )
 from matplotlib import pyplot as plt
 import numpy as np
-from Multi_Model.LeNet5 import Lenet5
+from model.LeNet5 import Lenet5
 import cv2
 
 
