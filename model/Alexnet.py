@@ -1,6 +1,4 @@
 # -*- coding: UTF-8 -*-
-
-
 import torch.nn as nn
 import torch
 
@@ -51,12 +49,10 @@ class AlexNet(nn.Module):
 
     def _initialize_weight(self):
         for m in self.modules():
-            # 如果m是卷积类
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
-            # 如果m是线性类
             elif isinstance(m, nn.Linear):
                 nn.init.normal_(m.weight, 0, 0.01)
                 nn.init.constant_(m.bias, 0)
