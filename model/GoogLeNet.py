@@ -80,11 +80,6 @@ class GoogLenet(nn.Module):
         x = self.dropout(x)
         x = self.fc(x)
 
-        # x = self.aver(x)
-        # x = torch.flatten(x, 1)
-        # x = self.dropout(x)
-        # output = self.fc(x)
-
         if self.aux and self.training:
             return x, aux1, aux2
 
