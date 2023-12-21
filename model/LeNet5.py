@@ -58,8 +58,8 @@ class C3Convlution(nn.Module):
     Args:
         custom_feat(dict):
         in_chanel(int):
-        out_chanel: int
-        kernel_size: Union[int, tuple],
+        out_chanel（int）：
+        kernel_size（int| tuple）:
         stride(int| tuple| list):
         padding(int | tuple | list): not used in LeNet
     """

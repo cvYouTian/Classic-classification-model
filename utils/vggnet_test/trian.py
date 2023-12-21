@@ -2,14 +2,21 @@
 import os
 import sys
 import json
-
+from typing import Union
+from pathlib import Path
 import torch
 import torch.nn as nn
 from torchvision import transforms, datasets
+from torch.utils.data import DataLoader, Dataset
 import torch.optim as optim
 from tqdm import tqdm
 
-from Milti_model.VggNet import Vgg16
+from model.VggNet import Vgg16
+
+
+class flowers_dataset(Dataset):
+    def __init__(self, root_path: Union[str, Path], image):
+        super().__init__()
 
 
 def main():
