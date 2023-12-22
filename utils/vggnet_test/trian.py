@@ -15,8 +15,9 @@ from model.VggNet import Vgg16
 
 
 class flowers_dataset(Dataset):
-    def __init__(self, root_path: Union[str, Path], image):
+    def __init__(self, root_path: Union[str, Path], image: Union[str, Path]):
         super().__init__()
+
 
 
 def main():
