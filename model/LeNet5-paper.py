@@ -78,19 +78,20 @@ class C3Convlution(nn.Module):
         self.stride = [stride, stride] if isinstance(stride, int) else stride
         self.padding = [padding, padding] if isinstance(padding, int) else padding
 
-    def forward(self, x):
-        b, c, h, w = x.shape
-        feat_container = list()
-        feat_idx = dict()
-        for i in range(b):
-            for idx, j in enumerate(range(c)):
-                feat_idx[idx] = x[i, j, :, :]
-                if idx == len(c) - 1:
-                    feat_container.append(feat_idx)
+    def DiscreteConv2d(self, solo_feat):
+        c, h, w = solo_feat.shape
+        out_h = (h + 2 * self.padding[0] - self.weight[0]) // self.stride + 1
+        out_w = (w + 2 * self.padding[0] - self.weight[0]) // self.stride + 1
+        for key, value in self.custom_feat.items():
+            # solo_feat[i,:,:]
+            ...
 
-        for feat in feat_container:
-            for i in self.custom_feat:
-                ...
+
+
+
+
+    def forward(self, x):
+        b = x.shape[0]
 
 
 class Lenet5(nn.Module):
@@ -101,27 +102,28 @@ class Lenet5(nn.Module):
         # [b, 6, 14, 14]
         self.S2 = SubSampling(2, 2, 0)
         # [b, 16, 10, 10]
-        self.C3 = C3Convlution({0: [0, 1, 2],
-                                1: [1, 2, 3],
-                                2: [2, 3, 4],
-                                3: [3, 4, 5],
-                                4: [0, 4, 5],
-                                5: [0, 1, 5],
-                                6: [0, 1, 2, 3],
-                                7: [1, 2, 3, 4],
-                                8: [2, 3, 4, 5],
-                                9: [0, 3, 4, 5],
-                                10: [0, 1, 4, 5],
-                                11: [0, 1, 2, 5],
-                                12: [0, 1, 3, 4],
-                                13: [1, 2, 4, 5],
-                                14: [0, 2, 3, 5],
-                                15: [0, 1, 2, 3, 4, 5]},
+        self.C3 = C3Convlution({0: (0, 1, 2),
+                                1: (1, 2, 3),
+                                2: (2, 3, 4),
+                                3: (3, 4, 5),
+                                4: (0, 4, 5),
+                                5: (0, 1, 5),
+                                6: (0, 1, 2, 3),
+                                7: (1, 2, 3, 4),
+                                8: (2, 3, 4, 5),
+                                9: (0, 3, 4, 5),
+                                10: (0, 1, 4, 5),
+                                11: (0, 1, 2, 5),
+                                12: (0, 1, 3, 4),
+                                13: (1, 2, 4, 5),
+                                14: (0, 2, 3, 5),
+                                15: (0, 1, 2, 3, 4, 5)},
                                6,
                                16,
                                5,
                                 1,
                                0)
+
         # [b, 16, 5, 5]
         self.S4 = SubSampling(2, 2, 0)
         # [b, 120, 1, 1]
@@ -137,8 +139,6 @@ class Lenet5(nn.Module):
         logits = self.C5(x)
 
         return logits
-
-
 
 
 if __name__ == "__main__":
