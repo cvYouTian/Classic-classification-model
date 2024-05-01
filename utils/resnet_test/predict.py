@@ -6,7 +6,7 @@ import torch
 from PIL import Image
 from torchvision import transforms
 import matplotlib.pyplot as plt
-from Milti_model.Resnet34 import ResNet34
+from model.Resnet34 import ResNet34
 
 
 def main():
