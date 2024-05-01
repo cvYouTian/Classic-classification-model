@@ -51,11 +51,13 @@ class ResBlock(nn.Module):
 
         return out
 
+
 # [224, 224, 3]
 class ResNet34(nn.Module):
     def __init__(self, num_class=5):
         super(ResNet34, self).__init__()
         # [112, 112, 64]
+
         self.conv1 = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=64, kernel_size=(7, 7), stride=(2, 2), padding=3, bias=False),
             nn.BatchNorm2d(64),
