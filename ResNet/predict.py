@@ -24,5 +24,5 @@ if __name__ == '__main__':
     out = net(img)
 
     _, preds = out.max(1)
-    classes = {0: "daisy", 1: "dandelion", 2: "rose", 3: "sunflower",4: "tulip"}
+    classes = {0: "daisy", 1: "dandelion", 2: "rose", 3: "sunflower", 4: "tulip"}
     print(classes[preds.item()])

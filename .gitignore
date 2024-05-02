@@ -2,6 +2,7 @@ data_set
 Milti_model/
 model/__pycache__/
 checkpoint
+__pycache__
 *.jpg
 *.png
 .idea

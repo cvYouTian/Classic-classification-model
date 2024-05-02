@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Union, Tuple
 import torch
 from PIL import Image
-import torch.nn.functional as F
 from torchvision import transforms
 from torch.utils.data import Dataset
 
@@ -44,12 +43,6 @@ class Flower(Dataset):
                         "rose": torch.tensor(2),
                         "sunflower": torch.tensor(3),
                         "tulip": torch.tensor(4)}
-
-        # self.classes = {"daisy": F.one_hot(torch.tensor(0),5),
-        #                 "dandelion": F.one_hot(torch.tensor(1),5),
-        #                 "rose": F.one_hot(torch.tensor(2),5),
-        #                 "sunflower": F.one_hot(torch.tensor(3),5),
-        #                 "tulip": F.one_hot(torch.tensor(4), 5)}
 
         if not self.root_path.exists():
             raise FileNotFoundError
