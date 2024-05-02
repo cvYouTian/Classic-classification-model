@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Union, Tuple
 import torch
 from PIL import Image
+import torch.nn.functional as F
 from torchvision import transforms
 from torch.utils.data import Dataset
 
@@ -38,6 +39,17 @@ class Flower(Dataset):
 
         # {label:[img1,img2,...]}
         self.data = dict()
+        self.classes = {"daisy": torch.tensor(0),
+                        "dandelion": torch.tensor(1),
+                        "rose": torch.tensor(2),
+                        "sunflower": torch.tensor(3),
+                        "tulip": torch.tensor(4)}
+
+        # self.classes = {"daisy": F.one_hot(torch.tensor(0),5),
+        #                 "dandelion": F.one_hot(torch.tensor(1),5),
+        #                 "rose": F.one_hot(torch.tensor(2),5),
+        #                 "sunflower": F.one_hot(torch.tensor(3),5),
+        #                 "tulip": F.one_hot(torch.tensor(4), 5)}
 
         if not self.root_path.exists():
             raise FileNotFoundError
@@ -49,6 +61,7 @@ class Flower(Dataset):
                     self.data[label.name].append(str(img))
         except Exception as e:
             print(e)
+
     def __len__(self) -> int:
 
         return len(self.imgs)
@@ -66,7 +79,7 @@ class Flower(Dataset):
         # 根据图像路径找到对应的标签
         for label, imgs in self.data.items():
             if img_path in (str(img) for img in imgs):
-                return label
+                return self.classes[label]
         return None
 
 
