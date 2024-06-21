@@ -109,8 +109,10 @@ class ResNet34(nn.Module):
         x7 = self.gap(x6)
         x8 = torch.flatten(x7, 1)
         out = self.fc(x8)
+        logits = torch.sigmoid(out)
 
-        return out
+        # return out
+        return logits
 
 
 if __name__ == '__main__':
