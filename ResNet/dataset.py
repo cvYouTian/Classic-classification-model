@@ -26,7 +26,7 @@ class Flower(Dataset):
         """
         super().__init__()
         self.root_path = root_path if isinstance(root_path, Path) else Path(root_path)
-        self.mode = mode
+        self.split = mode
 
         # 这里使用一些基本的数据增强的方案
         self.transform = {
@@ -63,7 +63,7 @@ class Flower(Dataset):
         img_path = str(self.imgs[item])
         img = Image.open(img_path)
         # 输入transform之前一定要使用Pillow的读取图像
-        img = self.transform[self.mode](img)
+        img = self.transform[self.split](img)
         label = self._get_label(img_path)
 
         return img, label
