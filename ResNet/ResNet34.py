@@ -109,10 +109,8 @@ class ResNet34(nn.Module):
         x7 = self.gap(x6)
         x8 = torch.flatten(x7, 1)
         out = self.fc(x8)
-        logits = torch.sigmoid(out)
 
-        # return out
-        return logits
+        return out
 
 
 if __name__ == '__main__':
@@ -121,8 +119,7 @@ if __name__ == '__main__':
     net.to("cuda:0")
     net.eval()
     transform = transforms.Compose([transforms.Resize(224),
-                                    transforms.ToTensor()
-    ])
+                                    transforms.ToTensor()])
     # image = Image.open(image_path)
     image = cv2.imread(image_path)
     image = Image.fromarray(image)

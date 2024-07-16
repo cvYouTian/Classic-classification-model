@@ -9,9 +9,6 @@ from ResNet34 import ResNet34
 if __name__ == '__main__':
     image_path = Path("/home/youtian/Documents/pro/pyCode/Classic-classification-model/2.jpg")
     # image_path = Path("/home/youtian/Documents/pro/pyCode/Classic-classification-model/1.jpg")
-    # image_path = Path("/home/youtian/Documents/pro/pyCode/Classic-classification-model/1.jpg")
-    # image_path = Path("/home/youtian/Documents/pro/pyCode/Classic-classification-model/1.jpg")
-    # image_path = Path("/home/youtian/Documents/pro/pyCode/Classic-classification-model/1.jpg")
     img = Image.open(image_path)
     img.show()
 
